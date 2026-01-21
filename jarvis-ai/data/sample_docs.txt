@@ -1,0 +1,3 @@
+Jarvis is an internal AI assistant designed for enterprise use.
+It answers employee questions using company documentation.
+Jarvis supports private, self-hosted language models.
