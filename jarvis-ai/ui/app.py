@@ -2,7 +2,10 @@ import streamlit as st
 import requests
 import uuid
 
-BACKEND_URL = "http://localhost:8000/chat"
+# -----------------------------
+# Backend Config
+# -----------------------------
+BACKEND_URL = "http://127.0.0.1:8000/chat"
 
 # -----------------------------
 # Page Config
@@ -14,7 +17,7 @@ st.set_page_config(
 )
 
 # -----------------------------
-# Initialize State
+# Initialize Session State
 # -----------------------------
 if "chats" not in st.session_state:
     first_chat_id = str(uuid.uuid4())
@@ -47,16 +50,16 @@ with st.sidebar:
     st.divider()
     st.markdown("### Conversations")
 
-    for chat_id in st.session_state.chats:
-        label = f"Chat {list(st.session_state.chats.keys()).index(chat_id) + 1}"
-        if st.button(label, key=chat_id, use_container_width=True):
+    for idx, chat_id in enumerate(st.session_state.chats.keys(), start=1):
+        if st.button(f"Chat {idx}", key=chat_id, use_container_width=True):
             st.session_state.active_chat_id = chat_id
 
     st.divider()
     st.markdown(
         """
         <p style="font-size:12px; color:gray;">
-        🧠 Model: Mock Mode<br>
+        🧠 Model: Local (Ollama – Mistral)<br>
+        📦 Vector DB: FAISS<br>
         🔐 Data stays local
         </p>
         """,
@@ -64,7 +67,7 @@ with st.sidebar:
     )
 
 # -----------------------------
-# Main Chat Area
+# Main Chat Area Header
 # -----------------------------
 st.markdown(
     """
@@ -78,35 +81,40 @@ st.markdown(
 
 st.divider()
 
+# -----------------------------
+# Render Chat Messages
+# -----------------------------
 messages = st.session_state.chats[st.session_state.active_chat_id]
 
-# Render messages
 for msg in messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
 # -----------------------------
-# Input
+# User Input
 # -----------------------------
 user_input = st.chat_input("Message Jarvis…")
 
 if user_input:
-    # Add user message
+    # Show user message immediately
     messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # Call backend
+    # Call backend safely
     try:
-        response = requests.post(
+        res = requests.post(
             BACKEND_URL,
             json={"message": user_input},
-            timeout=15
-        ).json()["response"]
-    except Exception:
-        response = "⚠️ Backend not available."
+            timeout=30
+        )
+        res.raise_for_status()
+        response_text = res.json().get("response", "⚠️ Empty response from backend.")
 
-    # Add assistant response
-    messages.append({"role": "assistant", "content": response})
+    except requests.exceptions.RequestException as e:
+        response_text = f"⚠️ Backend error: {e}"
+
+    # Show assistant response
+    messages.append({"role": "assistant", "content": response_text})
     with st.chat_message("assistant"):
-        st.markdown(response)
+        st.markdown(response_text)
