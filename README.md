@@ -1,195 +1,129 @@
-🤖 Jarvis — Local AI Assistant with RAG
+Jarvis — Local AI Assistant with RAG
 
-Jarvis is a local, enterprise-oriented AI assistant built using a local LLM (Ollama) and Retrieval-Augmented Generation (RAG).
+Jarvis is a local, enterprise-oriented AI assistant built using a local large language model (Ollama) and Retrieval-Augmented Generation (RAG).
 It answers user questions by retrieving relevant information from local documents and generating responses using a locally running language model.
 
-🎯 Project Goals
+Project Goals
 
 This project is designed to be:
 
-🔐 Fully local (no cloud APIs required)
+Fully local (no cloud APIs required)
 
-🧠 Context-aware using vector search
+Context-aware using vector search
 
-💬 ChatGPT-style UI
+ChatGPT-style conversational UI
 
-🏢 Enterprise-focused
+Enterprise-focused and privacy-preserving
 
-✨ Key Features
+Key Features
 
 Local LLM inference using Ollama (Mistral)
 
-RAG pipeline with FAISS vector database
+Retrieval-Augmented Generation (RAG) with FAISS
 
 Semantic search using Sentence Transformers
 
-FastAPI backend
+FastAPI backend for inference and orchestration
 
-Streamlit ChatGPT-style frontend
+Streamlit-based ChatGPT-style frontend
 
 Multiple conversations with sidebar navigation
 
-Clear scope control via system prompt
+Explicit scope control via system prompt
 
-All data stays on your machine
+All data remains on the local machine
 
-🧱 Project Structure
-jarvis-ai/
-│
-├── backend/
-│   ├── app.py                 # FastAPI backend
-│   │
-│   ├── llm/
-│   │   ├── mock_llm.py         # Mock LLM (early development)
-│   │   └── local_llm.py        # Ollama integration (Mistral)
-│   │
-│   ├── rag/
-│   │   ├── ingest.py           # Document ingestion & indexing
-│   │   └── vector_store.py     # FAISS vector store
-│   │
-│   ├── prompts/
-│   │   └── system.txt          # System prompt (behavior control)
-│   │
-│   └── __init__.py
-│
-├── ui/
-│   └── app.py                 # Streamlit UI (ChatGPT-style)
-│
-├── data/
-│   └── sample_docs.txt        # Knowledge base documents
-│
-├── requirements.txt
-└── README.md
-
-🏗️ Architecture Diagram
-┌─────────────────────────────────────────┐
-│               Streamlit UI              │
-│        (ChatGPT-style frontend)         │
-│               ui/app.py                 │
-└──────────────────────┬──────────────────┘
-                       │ HTTP POST /chat
-                       ▼
-┌─────────────────────────────────────────┐
-│            FastAPI Backend               │
-│            backend/app.py                │
-│                                         │
-│   ┌─────────────────────────────────┐   │
-│   │          System Prompt           │   │
-│   │   backend/prompts/system.txt     │   │
-│   └───────────────┬─────────────────┘   │
-│                   │                     │
-│   ┌───────────────▼─────────────────┐   │
-│   │            RAG Pipeline           │   │
-│   │          backend/rag/             │   │
-│   │     ingest.py / vector_store.py   │   │
-│   └───────────────┬─────────────────┘   │
-│                   │                     │
-│   ┌───────────────▼─────────────────┐   │
-│   │        FAISS Vector Database      │   │
-│   │        (local, in-memory)         │   │
-│   └───────────────┬─────────────────┘   │
-│                   │                     │
-│   ┌───────────────▼─────────────────┐   │
-│   │        Local LLM (Ollama)         │   │
-│   │           Model: Mistral          │   │
-│   │     backend/llm/local_llm.py      │   │
-│   └─────────────────────────────────┘   │
-└─────────────────────────────────────────┘
-
-🧠 How It Works (Flow)
+How It Works
 
 User enters a message in the Streamlit UI
 
-UI sends request to FastAPI /chat endpoint
+UI sends a request to the FastAPI /chat endpoint
 
-Backend:
+Backend retrieves relevant document chunks using FAISS
 
-Retrieves relevant document chunks using FAISS
+Retrieved context is combined with the system prompt
 
-Injects context + system prompt into final prompt
+The final prompt is sent to the local LLM via Ollama
 
-Sends prompt to Ollama (Mistral) running locally
+The generated response is returned and displayed in the UI
 
-Model generates a response
+Setup Instructions
+1. Prerequisites
 
-Response is returned and rendered in the UI
-
-⚙️ Setup Instructions
-1️⃣ Prerequisites
-
-Python 3.10+
+Python 3.10 or higher
 
 Git
 
 Ollama installed
 
-👉 Install Ollama:
+Install Ollama from:
 https://ollama.com/download
 
-2️⃣ Clone the Repository
+2. Clone the Repository
 git clone https://github.com/vikranth-11/Diligent-.git
 cd Diligent/jarvis-ai
 
-3️⃣ Create & Activate Virtual Environment
+3. Create and Activate Virtual Environment
 python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # Linux / macOS
+venv\Scripts\activate
+# source venv/bin/activate  (Linux / macOS)
 
-4️⃣ Install Dependencies
+4. Install Dependencies
 pip install -r requirements.txt
 
-5️⃣ Pull the LLM Model
+5. Pull the LLM Model
 ollama pull mistral
 
 
-Verify:
+Verify installation:
 
 ollama run mistral
 
-6️⃣ Start the Backend
+6. Start the Backend
 uvicorn backend.app:app --reload
 
 
-Backend: http://127.0.0.1:8000
+Backend URL: http://127.0.0.1:8000
 
-Swagger UI: http://127.0.0.1:8000/docs
+API Docs: http://127.0.0.1:8000/docs
 
-7️⃣ Start the UI
+7. Start the Frontend
 
-In a new terminal:
+Open a new terminal:
 
 streamlit run ui/app.py
 
 
-UI: http://localhost:8501
+UI URL: http://localhost:8501
 
-💬 Example Queries
-✅ In-scope
+Example Usage
 
-“Explain our system architecture”
+In-scope questions:
 
-“What is the purpose of this assistant?”
+What is the purpose of this assistant?
 
-⚠️ Out-of-scope
+Explain the system behavior
 
-“Teach me alphabets”
+Out-of-scope questions:
 
-“Write a poem”
+Teach me alphabets
 
-The assistant clearly communicates scope limitations and may optionally provide general reference information, depending on system prompt configuration.
+Write a poem
 
-🔐 Design Principles
+The assistant clearly communicates scope limitations and may optionally provide general reference information depending on system prompt configuration.
 
-Local-first: No external APIs
+Design Principles
 
-Privacy-preserving: Data never leaves the machine
+Local-first architecture with no external APIs
 
-Scope-aware: Optimized for enterprise knowledge use
+Privacy-preserving by design
 
-Modular: LLM, RAG, and UI are decoupled
+Scope-aware responses for enterprise use
 
-Extensible: Easy to add new documents or models
+Modular and extensible system design
 
-🏁 Conclusion
+Clear separation of UI, backend, and inference layers
 
-Jarvis demonstrates a production-grade local AI assistant architecture using modern RAG techniques, local inference, and a polished chat UI — without relying on any cloud LLM APIs.
+Conclusion
+
+Jarvis demonstrates a production-grade local AI assistant architecture using modern Retrieval-Augmented Generation techniques, local LLM inference, and a clean conversational interface, without relying on any cloud-based language model APIs.
